@@ -56,7 +56,7 @@ func (ts *ISO8601) UnmarshalJSON(data []byte) error {
 type IcecastStatus struct {
 	Icestats struct {
 		ServerStart ISO8601 `json:"server_start_iso8601"`
-		Source      []struct {
+		Source      struct {
 			Listeners   int     `json:"listeners"`
 			Listenurl   string  `json:"listenurl"`
 			ServerType  string  `json:"server_type"`
@@ -155,10 +155,10 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 
 	if s := <-status; s != nil {
 		e.serverStart.Set(float64(s.Icestats.ServerStart.Time().Unix()))
-		for _, source := range s.Icestats.Source {
-			e.listeners.WithLabelValues(source.Listenurl, source.ServerType).Set(float64(source.Listeners))
-			e.streamStart.WithLabelValues(source.Listenurl, source.ServerType).Set(float64(source.StreamStart.Time().Unix()))
-		}
+		//for _, source := range s.Icestats.Source {
+		e.listeners.WithLabelValues(s.Icestats.Source.Listenurl, s.Icestats.Source.ServerType).Set(float64(s.Icestats.Source.Listeners))
+		e.streamStart.WithLabelValues(s.Icestats.Source.Listenurl, s.Icestats.Source.ServerType).Set(float64(s.Icestats.Source.StreamStart.Time().Unix()))
+		//}
 	}
 
 	ch <- e.up
